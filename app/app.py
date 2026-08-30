@@ -1,11 +1,17 @@
 from app.database import create_tables, get_products
 from app.services.price_service import check_product_price
+from app.services.product_service import add_product
 
 
 def app():
     create_tables()
 
     print("🚨 Price Radar iniciado!")
+
+    product = add_product(
+        "https://www.amazon.com.br/gp/product/8569980612?smid=A1ZZFT5FULY4LN&psc=1",
+        75.00
+    )
 
     products = get_products() #Get all products from the database
 

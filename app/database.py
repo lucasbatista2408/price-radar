@@ -50,8 +50,17 @@ def save_product(product):
         product.target_price
     ))
 
+    if cursor.rowcount == 0:
+        connection.commit()
+        connection.close()
+        return None
+
+    product.id = cursor.lastrowid
+
     connection.commit()
     connection.close()
+
+    return product
 
 
 
