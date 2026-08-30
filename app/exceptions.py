@@ -4,3 +4,7 @@ class ProductScrapingError(Exception):
 
 class ProductAlreadyExistsError(Exception):
     pass
+
+
+class ProductNotFoundError(Exception):
+    pass

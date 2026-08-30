@@ -114,6 +114,7 @@ def get_products():
 
     return products
 
+
 def get_product_by_asin(asin):
     connection = get_connection()
     cursor = connection.cursor()
@@ -138,6 +139,49 @@ def get_product_by_asin(asin):
         url=row[3],
         target_price=row[4],
         image_url=row[5]
+    )
+
+
+def get_product_by_id(product_id):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT
+            p.id,
+            p.name,
+            p.asin,
+            p.url,
+            p.target_price,
+            p.image_url,
+            ph.price
+        FROM products p
+        LEFT JOIN price_history ph
+            ON ph.id = (
+                SELECT ph2.id
+                FROM price_history ph2
+                WHERE ph2.product_id = p.id
+                ORDER BY ph2.checked_at DESC
+                LIMIT 1
+            )
+        WHERE p.id = ?
+    """, (product_id,))
+
+    row = cursor.fetchone()
+
+    connection.close()
+
+    if row is None:
+        return None
+
+    return Product(
+        id=row[0],
+        name=row[1],
+        asin=row[2],
+        url=row[3],
+        target_price=row[4],
+        image_url=row[5],
+        price=row[6]
     )
 
 

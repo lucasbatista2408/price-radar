@@ -1,7 +1,15 @@
-from app.exceptions import ProductAlreadyExistsError, ProductScrapingError
+from app.exceptions import (
+    ProductAlreadyExistsError,
+    ProductScrapingError,
+    ProductNotFoundError
+)
+
 from app.models import Product
+
 from app.scraper.amazon import amazon_scraper
-from app.database import save_product, save_price_history, get_product_by_asin
+
+from app.database import (save_product, save_price_history, get_product_by_asin, get_product_by_id)
+
 from app.utils import extract_asin
 
 
@@ -43,3 +51,14 @@ def add_product(url, target_price):
     save_price_history(saved_product)
 
     return saved_product
+
+
+def get_product(product_id):
+    product = get_product_by_id(product_id)
+
+    if product is None:
+        raise ProductNotFoundError(
+            "O produto não foi encontrado."
+        )
+
+    return product
