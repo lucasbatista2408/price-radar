@@ -1,19 +1,26 @@
-from app.services.product_service import add_product
-from app.exceptions import ProductScrapingError, ProductAlreadyExistsError
+from app.database import get_products
+from app.services.price_service import check_product_price
 
 
 def app():
-    try:
-        product = add_product(
-            "https://www.amazon.com.br/gp/product/8569980612?smid=A1ZZFT5FULY4LN&psc=1",
-            75.00
-        )
+    products = get_products()
 
-        print(f"Produto cadastrado: {product.name}")
-        print(f"Preço: R$ {product.price:.2f}")
+    for product in products:
+        result = check_product_price(product)
 
-    except ProductScrapingError as error:
-        print(f"Erro ao buscar produto: {error}")
+        if result is None:
+            print(f"Não foi possível verificar: {product.name}")
+            continue
 
-    except ProductAlreadyExistsError as error:
-        print(f"Erro: {error}")
+        updated_product, is_target_reached = result
+
+        print(f"Nome: {updated_product.name}")
+        print(f"Preço: R$ {updated_product.price:.2f}")
+        print(f"Target: R$ {updated_product.target_price:.2f}")
+
+        if is_target_reached:
+            print("🎯 Target atingido!")
+        else:
+            print("Target ainda não atingido.")
+
+        print()
