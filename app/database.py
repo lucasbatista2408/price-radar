@@ -74,8 +74,23 @@ def get_products():
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT id, name, asin, url, target_price, image_url
-        FROM products
+        SELECT
+            p.id,
+            p.name,
+            p.asin,
+            p.url,
+            p.target_price,
+            p.image_url,
+            ph.price
+        FROM products p
+        LEFT JOIN price_history ph
+            ON ph.id = (
+                SELECT ph2.id
+                FROM price_history ph2
+                WHERE ph2.product_id = p.id
+                ORDER BY ph2.checked_at DESC
+                LIMIT 1
+            )
     """)
 
     rows = cursor.fetchall()
@@ -91,13 +106,13 @@ def get_products():
             asin=row[2],
             url=row[3],
             target_price=row[4],
-            image_url=row[5]
+            image_url=row[5],
+            price=row[6]
         )
 
         products.append(product)
 
     return products
-
 
 def get_product_by_asin(asin):
     connection = get_connection()

@@ -6,6 +6,7 @@ from app.exceptions import (
     ProductScrapingError,
     ProductAlreadyExistsError
 )
+from app.database import get_products as get_products_from_database
 
 
 app = FastAPI()
@@ -30,7 +31,8 @@ def create_product(product_request: ProductRequest):
             "url": product.url,
             "price": product.price,
             "target_price": product.target_price,
-            "image_url": product.image_url
+            "image_url": product.image_url,
+            "asin": product.asin
         }
 
     except ProductAlreadyExistsError as error:
@@ -44,3 +46,20 @@ def create_product(product_request: ProductRequest):
             status_code=422,
             detail=str(error)
         )
+
+@app.get("/products")
+def get_products():
+        products = get_products_from_database()
+
+        return [
+            {
+                "id": product.id,
+                "name": product.name,
+                "url": product.url,
+                "price": product.price,
+                "target_price": product.target_price,
+                "image_url": product.image_url,
+                "asin": product.asin
+            }
+            for product in products
+        ]
