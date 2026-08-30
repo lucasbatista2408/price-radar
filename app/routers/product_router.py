@@ -7,6 +7,8 @@ from app.services.product_service import (
     get_product
 )
 
+from app.services.price_service import check_all_products
+
 from app.database import get_products as get_products_from_database
 
 from app.exceptions import (
@@ -91,3 +93,20 @@ def get_product_by_id(product_id: int):
             status_code=404,
             detail=str(error)
         )
+
+
+@router.post("/check-price")
+def check_prices():
+    results = check_all_products()
+
+    return [
+        {
+            "id": result["product"].id,
+            "name": result["product"].name,
+            "price": result["price"],
+            "target_price": result["product"].target_price,
+            "target_reached": result["target_reached"],
+            "error": result["error"]
+        }
+        for result in results
+    ]

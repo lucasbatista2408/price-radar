@@ -1,5 +1,8 @@
 from app.scraper.amazon import amazon_scraper
-from app.database import save_price_history
+from app.database import (
+    get_products,
+    save_price_history
+)
 
 
 def check_product_price(product):
@@ -10,7 +13,37 @@ def check_product_price(product):
 
     save_price_history(updated_product)
 
-    if updated_product.price <= updated_product.target_price:
-        return updated_product, True
+    target_reached = (
+        updated_product.price <= updated_product.target_price
+    )
 
-    return updated_product, False
+    return updated_product, target_reached
+
+
+def check_all_products():
+    products = get_products()
+
+    results = []
+
+    for product in products:
+        result = check_product_price(product)
+
+        if result is None:
+            results.append({
+                "product": product,
+                "price": None,
+                "target_reached": False,
+                "error": True
+            })
+            continue
+
+        updated_product, target_reached = result
+
+        results.append({
+            "product": updated_product,
+            "price": updated_product.price,
+            "target_reached": target_reached,
+            "error": False
+        })
+
+    return results
