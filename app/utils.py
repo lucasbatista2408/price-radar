@@ -1,8 +1,8 @@
-def get_price (price):
-    price_text = price.first.inner_text()
+def get_price(price): 
+    whole = price.locator(".a-price-whole").inner_text() 
+    fraction = price.locator(".a-price-fraction").inner_text()
 
-    price_text = price_text.replace("R$", "")
-    price_text = price_text.replace("\n", "")
-    price_text = price_text.replace(",", ".")
+    whole = whole.replace(",", "").replace(".", "").strip() 
+    fraction = fraction.strip()
 
-    return float(price_text)
+    return float(f"{whole}.{fraction}")
