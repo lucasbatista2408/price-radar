@@ -8,7 +8,7 @@ def amazon_scraper(product):
             browser = p.chromium.launch(headless=True)
 
             page = browser.new_page()
-            page.goto(product.url)
+            page.goto(product.url, wait_until="domcontentloaded", timeout=60000)
 
             price = page.locator(".priceToPay")
             title = page.locator("#productTitle")
@@ -19,15 +19,12 @@ def amazon_scraper(product):
                 title_value = title.inner_text()
 
                 if image.count() > 0:
-                    image_url = image.get_attribute("data-old-hires")
+                    product.image_url = image.get_attribute("data-old-hires")
                 else:
-                    image_url = None
+                    product.image_url = None
 
                 product.name = title_value
                 product.price = price_value
-
-                # Ainda não temos image_url no model.
-                # product.image_url = image_url
 
                 browser.close()
 

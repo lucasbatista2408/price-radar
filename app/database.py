@@ -2,15 +2,17 @@ import sqlite3
 from app.models import Product
 from datetime import datetime
 
+
 DB_NAME = "price_radar.db"
+
 
 def get_connection():
     conn = sqlite3.connect(DB_NAME)
     return conn
 
+
 def create_tables():
     connection = get_connection()
-
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -18,17 +20,18 @@ def create_tables():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             url TEXT NOT NULL UNIQUE,
-            target_price REAL NOT NULL
+            target_price REAL NOT NULL,
+            image_url TEXT
         )
     """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS price_history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_id INTEGER NOT NULL,
-        price REAL NOT NULL,
-        checked_at TEXT NOT NULL,
-        FOREIGN KEY (product_id) REFERENCES products(id)
+        CREATE TABLE IF NOT EXISTS price_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER NOT NULL,
+            price REAL NOT NULL,
+            checked_at TEXT NOT NULL,
+            FOREIGN KEY (product_id) REFERENCES products(id)
         )
     """)
 
@@ -36,18 +39,19 @@ def create_tables():
     connection.close()
 
 
-
 def save_product(product):
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute("""
-        INSERT OR IGNORE INTO products (name, url, target_price)
-        VALUES (?, ?, ?)
+        INSERT OR IGNORE INTO products
+        (name, url, target_price, image_url)
+        VALUES (?, ?, ?, ?)
     """, (
         product.name,
         product.url,
-        product.target_price
+        product.target_price,
+        product.image_url
     ))
 
     if cursor.rowcount == 0:
@@ -63,13 +67,12 @@ def save_product(product):
     return product
 
 
-
 def get_products():
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT id, name, url, target_price
+        SELECT id, name, url, target_price, image_url
         FROM products
     """)
 
@@ -87,10 +90,11 @@ def get_products():
             target_price=row[3]
         )
 
+        product.image_url = row[4]
+
         products.append(product)
 
     return products
-
 
 
 def save_price_history(product):
@@ -108,7 +112,6 @@ def save_price_history(product):
 
     connection.commit()
     connection.close()
-
 
 
 def get_price_history(product_id):
