@@ -7,7 +7,10 @@ from app.services.product_service import (
     get_product
 )
 
-from app.services.price_service import check_all_products
+from app.services.price_service import (
+    check_all_products,
+    get_product_price_history
+)
 
 from app.database import get_products as get_products_from_database
 
@@ -110,3 +113,27 @@ def check_prices():
         }
         for result in results
     ]
+
+@router.get("/{product_id}/price-history")
+def get_price_history(product_id: int):
+    history = get_product_price_history(product_id)
+
+    if not history:
+        raise HTTPException(
+            status_code=404,
+            detail="Produto não encontrado."
+        )
+
+    return {
+        "id": history[0][0],
+        "name": history[0][1],
+        "image_url": history[0][2],
+        "history": [
+            {
+                "price": row[3],
+                "checked_at": row[4]
+            }
+            for row in history
+            if row[3] is not None
+        ]
+    }

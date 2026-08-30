@@ -1,7 +1,9 @@
 from app.scraper.amazon import amazon_scraper
+
 from app.database import (
     get_products,
-    save_price_history
+    save_price_history,
+    get_price_history
 )
 
 
@@ -47,3 +49,7 @@ def check_all_products():
         })
 
     return results
+
+
+def get_product_price_history(product_id):
+    return get_price_history(product_id)

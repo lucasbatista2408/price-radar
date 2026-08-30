@@ -208,10 +208,17 @@ def get_price_history(product_id):
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT price, checked_at
-        FROM price_history
-        WHERE product_id = ?
-        ORDER BY checked_at DESC
+        SELECT
+            p.id,
+            p.name,
+            p.image_url,
+            ph.price,
+            ph.checked_at
+        FROM products p
+        LEFT JOIN price_history ph
+            ON p.id = ph.product_id
+        WHERE p.id = ?
+        ORDER BY ph.checked_at DESC
     """, (product_id,))
 
     rows = cursor.fetchall()
