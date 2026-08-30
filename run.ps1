@@ -1,1 +1,1 @@
-.\.venv\Scripts\python.exe -m app.main
+.\.venv\Scripts\python.exe -m app.app

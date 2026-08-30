@@ -1,14 +1,14 @@
 import sqlite3
-from app.models import Product
 from datetime import datetime
+
+from app.models import Product
 
 
 DB_NAME = "price_radar.db"
 
 
 def get_connection():
-    conn = sqlite3.connect(DB_NAME)
-    return conn
+    return sqlite3.connect(DB_NAME)
 
 
 def create_tables():
@@ -19,6 +19,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
+            asin TEXT,
             url TEXT NOT NULL UNIQUE,
             target_price REAL NOT NULL,
             image_url TEXT
@@ -45,10 +46,11 @@ def save_product(product):
 
     cursor.execute("""
         INSERT OR IGNORE INTO products
-        (name, url, target_price, image_url)
-        VALUES (?, ?, ?, ?)
+        (name, asin, url, target_price, image_url)
+        VALUES (?, ?, ?, ?, ?)
     """, (
         product.name,
+        product.asin,
         product.url,
         product.target_price,
         product.image_url
@@ -72,7 +74,7 @@ def get_products():
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT id, name, url, target_price, image_url
+        SELECT id, name, asin, url, target_price, image_url
         FROM products
     """)
 
@@ -86,15 +88,42 @@ def get_products():
         product = Product(
             id=row[0],
             name=row[1],
-            url=row[2],
-            target_price=row[3]
+            asin=row[2],
+            url=row[3],
+            target_price=row[4],
+            image_url=row[5]
         )
-
-        product.image_url = row[4]
 
         products.append(product)
 
     return products
+
+
+def get_product_by_asin(asin):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id, name, asin, url, target_price, image_url
+        FROM products
+        WHERE asin = ?
+    """, (asin,))
+
+    row = cursor.fetchone()
+
+    connection.close()
+
+    if row is None:
+        return None
+
+    return Product(
+        id=row[0],
+        name=row[1],
+        asin=row[2],
+        url=row[3],
+        target_price=row[4],
+        image_url=row[5]
+    )
 
 
 def save_price_history(product):
@@ -102,7 +131,8 @@ def save_price_history(product):
     cursor = connection.cursor()
 
     cursor.execute("""
-        INSERT INTO price_history (product_id, price, checked_at)
+        INSERT INTO price_history
+        (product_id, price, checked_at)
         VALUES (?, ?, ?)
     """, (
         product.id,
