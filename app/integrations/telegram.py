@@ -5,12 +5,11 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 
-def send_message(image_url, caption):
+def send_offer(image_url, caption):
     url = (
         f"https://api.telegram.org/bot"
         f"{TELEGRAM_BOT_TOKEN}/sendPhoto"
@@ -35,6 +34,24 @@ def send_message(image_url, caption):
 
     return response.json()
 
+def send_message(message):
+    url = (
+        f"https://api.telegram.org/bot"
+        f"{TELEGRAM_BOT_TOKEN}/sendMessage"
+    )
+
+    response = requests.post(
+        url,
+        data={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": message,
+            "parse_mode": "HTML"
+        }
+    )
+
+    response.raise_for_status()
+
+    return response.json()
 
 def notify(product):
     message = (
@@ -44,4 +61,20 @@ def notify(product):
         f"🛒 <a href=\"{product.url}\">Comprar</a>"
     )
 
-    send_message(product.image_url, message)
+    send_offer(product.image_url, message)
+
+def get_updates(offset=None):
+    url = (
+        f"https://api.telegram.org/bot"
+        f"{TELEGRAM_BOT_TOKEN}/getUpdates"
+    )
+
+    params = {}
+
+    if offset is not None:
+        params["offset"] = offset
+
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+
+    return response.json()
