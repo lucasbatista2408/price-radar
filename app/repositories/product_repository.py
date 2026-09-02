@@ -33,7 +33,7 @@ def save_product(product):
     return product
 
 
-def get_products():
+def get_all_products():
     connection = get_connection()
     cursor = connection.cursor()
 
@@ -190,6 +190,7 @@ def get_price_history(product_id):
     connection.close()
 
     return rows
+
 
 def get_latest_price(product_id):
     connection = get_connection()

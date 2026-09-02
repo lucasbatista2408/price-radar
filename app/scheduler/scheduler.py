@@ -1,7 +1,8 @@
 import time
 
-from app.services.price_service import check_live_price
-from app.integrations.telegram import send_message
+from app.services.price_service import check_product_price
+from app.integrations.telegram import notify, send_message
+from app.services.product_service import get_product
 
 
 PRODUCT_ID = 28
@@ -10,18 +11,18 @@ INTERVAL = 10
 
 def run_scheduler():
     while True:
-        product = check_live_price(PRODUCT_ID)
+        product = get_product(PRODUCT_ID)
 
         if product is not None:
+            updated_product, target_reached, should_notify = check_product_price(product)
 
-            message = (
-                f"<b>{product.name}</b>\n"
-                f"🔻 PREÇO BAIXO\n"
-                f"R$ {product.price:.2f}\n"
-                f"🛒 <a href=\"{product.url}\">Comprar</a>"
-            )
+            print(
+                f"Produto: {updated_product.name}\n"
+                f"Preço atual: R$ {updated_product.price:.2f}\n"
+                f"Notificação: {'Sim' if should_notify else 'Não'}\n"
+                )
 
-            if product is not None:
-                send_message(message)
+            #if should_notify:
+            notify()
 
-        time.sleep(INTERVAL)
+        time.sleep(INTERVAL)   

@@ -13,7 +13,7 @@ from app.services.price_service import (
     get_product_price_history
 )
 
-from app.repositories.product_repository import get_products as get_products_from_database
+from app.repositories.product_repository import get_all_products as get_products_from_database
 
 from app.exceptions import (
     ProductScrapingError,
@@ -58,7 +58,6 @@ def create_product(product_request: ProductRequest):
             detail=str(error)
         )
 
-
 @router.get("")
 def get_products():
     products = get_products_from_database()
@@ -75,7 +74,6 @@ def get_products():
         }
         for product in products
     ]
-
 
 @router.get("/{product_id}")
 def get_product_by_id(product_id: int):
@@ -97,7 +95,6 @@ def get_product_by_id(product_id: int):
             status_code=404,
             detail=str(error)
         )
-
 
 @router.post("/check-price")
 def check_prices():

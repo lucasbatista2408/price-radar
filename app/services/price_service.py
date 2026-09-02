@@ -1,6 +1,6 @@
 from app.repositories.product_repository import (
     get_product_by_id,
-    get_products,
+    get_all_products,
     save_price_history,
     get_price_history,
     get_latest_price,
@@ -34,10 +34,12 @@ def check_product_price(product):
 
     save_price_history(updated_product)
 
+    print(f"Previous price: {previous_price}")
+
     return updated_product, target_reached, should_notify
 
 def check_all_products():
-    products = get_products()
+    products = get_all_products()
 
     results = []
 
@@ -65,7 +67,6 @@ def check_all_products():
         })
 
     return results
-
 
 def get_product_price_history(product_id):
     return get_price_history(product_id)
