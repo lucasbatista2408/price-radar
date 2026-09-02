@@ -21,7 +21,8 @@ def send_message(message):
         url,
         data={
             "chat_id": TELEGRAM_CHAT_ID,
-            "text": message
+            "text": message,
+            "parse_mode": "HTML"
         }
     )
 
