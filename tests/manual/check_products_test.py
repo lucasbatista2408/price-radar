@@ -1,4 +1,4 @@
-from app.database import get_products
+from app.repositories.product_repository import get_products
 from app.services.price_service import check_product_price
 
 

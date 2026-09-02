@@ -9,10 +9,11 @@ from app.services.product_service import (
 
 from app.services.price_service import (
     check_all_products,
+    check_live_price,
     get_product_price_history
 )
 
-from app.database import get_products as get_products_from_database
+from app.repositories.product_repository import get_products as get_products_from_database
 
 from app.exceptions import (
     ProductScrapingError,
@@ -109,7 +110,8 @@ def check_prices():
             "price": result["price"],
             "target_price": result["product"].target_price,
             "target_reached": result["target_reached"],
-            "error": result["error"]
+            "should_notify": result["should_notify"],
+            "error": result["error"]    
         }
         for result in results
     ]
@@ -136,4 +138,23 @@ def get_price_history(product_id: int):
             for row in history
             if row[3] is not None
         ]
+    }
+
+@router.get("/{product_id}/check-live-price")
+def check_live_product_price(product_id: int):
+    product_live_price = check_live_price(product_id)
+
+    if product_live_price is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Produto não encontrado ou erro ao verificar o preço."
+        )
+
+    return {
+        "id": product_live_price.id,
+        "name": product_live_price.name,
+        "url": product_live_price.url,
+        "price": product_live_price.price,
+        "target_price": product_live_price.target_price,
+        "image_url": product_live_price.image_url,
     }
