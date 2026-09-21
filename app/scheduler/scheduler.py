@@ -1,28 +1,75 @@
+import logging
+import sys
 import time
 
-from app.services.price_service import check_product_price
-from app.integrations.telegram import notify, send_message
-from app.services.product_service import get_product
+from app.integrations.telegram import notify
+from app.services.price_service import check_all_products
 
+INTERVAL = 15 * 60  # 15 minutos
 
-PRODUCT_ID = 28
-INTERVAL = 10
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 
 def run_scheduler():
-    while True:
-        product = get_product(PRODUCT_ID)
+    logging.info(
+        "⏰ Scheduler do PriceRadar iniciado! "
+        "Monitorando todos os produtos..."
+    )
 
-        if product is not None:
-            updated_product, target_reached, should_notify = check_product_price(product)
+    try:
+        while True:
+            try:
+                results = check_all_products()
 
-            print(
-                f"Produto: {updated_product.name}\n"
-                f"Preço atual: R$ {updated_product.price:.2f}\n"
-                f"Notificação: {'Sim' if should_notify else 'Não'}\n"
+                if not results:
+                    logging.info(
+                        "Nenhum produto cadastrado para monitorar no momento."
+                    )
+
+                for item in results:
+                    product = item["product"]
+
+                    if item["error"]:
+                        logging.error(
+                            f"Erro ao verificar o produto "
+                            f"ID {product.id} ({product.name}): "
+                            f"{item['error']}"
+                        )
+                        continue
+
+                    logging.info(
+                        f"Produto ID {product.id} ({product.name}) | "
+                        f"Preço atual: R$ {item['price']:.2f} | "
+                        f"Notificar: "
+                        f"{'Sim' if item['should_notify'] else 'Não'}"
+                    )
+
+                    if item["should_notify"]:
+                        notify(product)
+
+            except Exception as e:
+                logging.error(
+                    f"Erro inesperado no ciclo do scheduler: {e}"
                 )
 
-            if should_notify:
-                notify(updated_product)
+            logging.info(
+                f"Aguardando {INTERVAL // 60} minutos "
+                "para o próximo ciclo...\n"
+            )
 
-        time.sleep(INTERVAL)   
+            time.sleep(INTERVAL)
+
+    except KeyboardInterrupt:
+        print(
+            "\n🛑 Encerramento solicitado via Terminal "
+            "(Ctrl+C). Fechando scheduler..."
+        )
+        sys.exit(0)
+
+
+if __name__ == "__main__":
+    run_scheduler()
+

@@ -34,8 +34,6 @@ def check_product_price(product):
 
     save_price_history(updated_product)
 
-    print(f"Previous price: {previous_price}")
-
     return updated_product, target_reached, should_notify
 
 def check_all_products():
