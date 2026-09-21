@@ -6,7 +6,7 @@ from app.repositories.product_repository import (
     get_latest_price,
 )
 
-from app.scraper.amazon import amazon_scraper
+from app.integrations.scraper.amazon import amazon_scraper
 
 
 def check_product_price(product):

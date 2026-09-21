@@ -63,13 +63,15 @@ def notify(product):
 
     send_offer(product.image_url, message)
 
-def get_updates(offset=None):
+def get_updates(offset=None, timeout=30):
     url = (
         f"https://api.telegram.org/bot"
         f"{TELEGRAM_BOT_TOKEN}/getUpdates"
     )
 
-    params = {}
+    params = {
+        "timeout": timeout
+    }
 
     if offset is not None:
         params["offset"] = offset
@@ -78,3 +80,11 @@ def get_updates(offset=None):
     response.raise_for_status()
 
     return response.json()
+
+def clear_updates():
+    response = get_updates(offset=-1, timeout=0)
+
+    if not response["result"]:
+        return None
+
+    return response["result"][-1]["update_id"] + 1

@@ -6,7 +6,7 @@ from app.exceptions import (
 
 from app.models import Product
 
-from app.scraper.amazon import amazon_scraper
+from app.integrations.scraper.amazon import amazon_scraper
 
 from app.repositories.product_repository import (save_product, save_price_history, get_product_by_asin, get_product_by_id)
 

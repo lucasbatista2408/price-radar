@@ -1,7 +1,7 @@
 import sqlite3
 
 from app.database import get_products
-from app.scraper.amazon import amazon_scraper
+from app.integrations.scraper.amazon import amazon_scraper
 
 
 DB_NAME = "price_radar.db"
