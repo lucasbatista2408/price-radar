@@ -22,7 +22,7 @@ def run_scheduler():
                 f"Notificação: {'Sim' if should_notify else 'Não'}\n"
                 )
 
-            #if should_notify:
-            notify()
+            if should_notify:
+                notify(updated_product)
 
         time.sleep(INTERVAL)   
